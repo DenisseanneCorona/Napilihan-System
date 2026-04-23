@@ -34,6 +34,7 @@ print(f"Frontend PID: {frontend.pid}")
 
 print("\nBoth servers running! Press Ctrl+C to stop.")
 print("Login: http://localhost:8080/pages/login.html (admin/admin123)")
+print("Admin Email: johncarloaganan26@gmail.com")
 
 try:
     backend.wait()
