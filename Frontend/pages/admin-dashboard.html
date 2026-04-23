@@ -1,118 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<script>
-if (localStorage.getItem("role") !== "admin") {
-alert("Admin access only");
-window.location.href = "login.html";
-}
-</script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NAgCO Admin Dashboard</title>
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        if (localStorage.getItem("role") !== "admin") {
+            alert("Admin access only");
+            window.location.href = "login.html";
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAgCO Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="../images/logo.png">
 </head>
+
 <body>
-<div class="sidebar">
-<h2 class="logo">NAgCO</h2>
-<ul>
-<li onclick="goDashboard()"><i class="fa fa-home"></i> Dashboard</li>
-<li onclick="goLoan()"><i class="fa fa-hand-holding-dollar"></i> Loan Management</li>
-<li onclick="goReports()"><i class="fa fa-chart-line"></i> Reports</li>
-<li onclick="goMembers()"><i class="fa fa-users"></i> Members</li>
-<li onclick="logout()"><i class="fa fa-sign-out"></i> Logout</li>
-</ul>
-</div>
-
-<div class="main-content">
-<div class="topbar">
-<input type="text" id="searchMember" placeholder="Search member..." onkeyup="searchTable()">
-<div class="top-icons">
-<i class="fa fa-bell" onclick="showNotifications()"></i>
-<i class="fa fa-user-circle" onclick="openProfile()"></i>
-</div>
-</div>
-
-<h1 id="dashboard">Admin Dashboard</h1>
-<div class="cards">
-<div class="card">
-<h3>Total Active Loans</h3>
-<p>Database-backed loan requests</p>
-</div>
-<div class="card">
-<h3>Total Collection This Month</h3>
-<p>See reports page</p>
-</div>
-<div class="card">
-<h3>Announcements</h3>
-<p>Post updates for all members</p>
-</div>
-</div>
-
-<h2>Member Management</h2>
-    <table id="memberTable">
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Role</th>
-            <th>Action</th>
-        </tr>
-    </table>
-
-<h2>Announcements</h2>
-<div class="card" style="max-width: 700px; margin: 10px 0;">
-<h3 style="margin: 0 0 10px 0;">Post Announcement</h3>
-<div style="display:flex; gap:10px; flex-wrap:wrap;">
-<input id="announcementTitle" type="text" placeholder="Announcement title" style="flex:1; min-width: 220px; padding:10px; border:1px solid #ddd; border-radius:6px;">
-<textarea id="announcementContent" placeholder="Announcement details" style="flex-basis:100%; min-height:100px; padding:10px; border:1px solid #ddd; border-radius:6px;"></textarea>
-<button onclick="postAnnouncement()" style="padding:10px 14px; border:none; border-radius:6px; background:#2e7d32; color:white; cursor:pointer;">Post</button>
-</div>
-</div>
-
-<table id="announcementTable">
-<tr>
-<th>Date</th>
-<th>Title</th>
-<th>Content</th>
-</tr>
-    </table>
-
-    <!-- Edit Role Modal -->
-    <div id="editRoleModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;">
-        <div style="max-width:400px; margin:10vh auto; background:#fff; border-radius:12px; padding:24px; box-shadow:0 8px 25px rgba(0,0,0,0.18);">
-            <h3 style="margin-top:0; color:#2e7d32;">Edit User Role</h3>
-            <p id="editRoleUsername" style="margin-bottom:16px; color:#555;"></p>
-            <label for="roleSelect" style="display:block; margin-bottom:8px; font-weight:500;">Role</label>
-            <select id="roleSelect" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:16px;">
-                <option value="member">Member</option>
-                <option value="admin">Admin</option>
-            </select>
-            <div style="display:flex; gap:10px;">
-                <button type="button" class="login-btn" style="margin-top:0;" onclick="saveUserRole()">Save</button>
-                <button type="button" class="login-btn" style="margin-top:0; background:#757575;" onclick="closeEditRoleModal()">Cancel</button>
-            </div>
+    <div class="sidebar">
+        <div class="logo-left">
+            <img src="../images/logo.png" alt="NAgCO Logo" class="logo-img">
+            <h2 class="logo-text">NAgCO</h2>
         </div>
+        <ul>
+            <li onclick="goDashboard()"><i class="fa fa-home"></i> Dashboard</li>
+            <li onclick="goLoan()"><i class="fa fa-hand-holding-dollar"></i> Loan Management</li>
+            <li onclick="goReports()"><i class="fa fa-chart-line"></i> Reports</li>
+            <li onclick="goMembers()"><i class="fa fa-users"></i> Members</li>
+            <li onclick="logout()"><i class="fa fa-sign-out"></i> Logout</li>
+        </ul>
     </div>
 
-    <h2 id="loanSection">Loan Requests</h2>
-<table id="loanTable">
-<tr>
-<th>Member</th>
-<th>Loan Type</th>
-<th>Amount</th>
-<th>Status</th>
-<th>Date</th>
-<th>Action</th>
-</tr>
-</table>
+    <div class="main-content">
+        <div class="topbar" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <h1 style="margin: 0; font-size: 20px; color: #2e7d32;">Admin Dashboard</h1>
+                <input type="text" id="searchMember" placeholder="Search member..." onkeyup="searchTable()" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; width: 250px; font-size: 14px;">
+            </div>
+            <div class="top-icons" style="display: flex; align-items: center; gap: 15px; color: #555;">
+                <i class="fa fa-bell" style="cursor: pointer; font-size: 18px;" onclick="showNotifications()"></i>
+                <i class="fa fa-user-circle" style="cursor: pointer; font-size: 22px; color: #2e7d32;" onclick="openProfile()"></i>
+            </div>
+        </div>
 
-<footer>
-&copy; 2026 Napilihan Agriculture Cooperative System
-</footer>
-</div>
+        <h1 id="dashboard">Admin Dashboard</h1>
+        <div class="cards">
+            <div class="card">
+                <h3>Total Active Loans</h3>
+                <p>Database-backed loan requests</p>
+            </div>
+            <div class="card">
+                <h3>Total Collection This Month</h3>
+                <p>See reports page</p>
+            </div>
+            <div class="card">
+                <h3>Announcements</h3>
+                <p>Post updates for all members</p>
+            </div>
+        </div>
 
-<script src="../js/admin/admin.js?v=20260416f"></script>
+        <h2>Member Management</h2>
+        <table id="memberTable">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Role</th>
+                <th>Action</th>
+            </tr>
+        </table>
+
+        <h2>Announcements</h2>
+        <div class="card" style="max-width: 700px; margin: 10px 0;">
+            <h3 style="margin: 0 0 10px 0;">Post Announcement</h3>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <input id="announcementTitle" type="text" placeholder="Announcement title"
+                    style="flex:1; min-width: 220px; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                <textarea id="announcementContent" placeholder="Announcement details"
+                    style="flex-basis:100%; min-height:100px; padding:10px; border:1px solid #ddd; border-radius:6px;"></textarea>
+                <button onclick="postAnnouncement()"
+                    style="padding:10px 14px; border:none; border-radius:6px; background:#2e7d32; color:white; cursor:pointer;">Post</button>
+            </div>
+        </div>
+
+        <table id="announcementTable">
+            <tr>
+                <th>Date</th>
+                <th>Title</th>
+                <th>Content</th>
+            </tr>
+        </table>
+
+        <!-- Edit Role Modal -->
+        <div id="editRoleModal"
+            style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;">
+            <div
+                style="max-width:400px; margin:10vh auto; background:#fff; border-radius:12px; padding:24px; box-shadow:0 8px 25px rgba(0,0,0,0.18);">
+                <h3 style="margin-top:0; color:#2e7d32;">Edit User Role</h3>
+                <p id="editRoleUsername" style="margin-bottom:16px; color:#555;"></p>
+                <label for="roleSelect" style="display:block; margin-bottom:8px; font-weight:500;">Role</label>
+                <select id="roleSelect"
+                    style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:16px;">
+                    <option value="member">Member</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" class="login-btn" style="margin-top:0;" onclick="saveUserRole()">Save</button>
+                    <button type="button" class="login-btn" style="margin-top:0; background:#757575;"
+                        onclick="closeEditRoleModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <h2 id="loanSection">Loan Requests</h2>
+        <table id="loanTable">
+            <tr>
+                <th>Member</th>
+                <th>Loan Type</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </table>
+
+        <footer>
+            &copy; 2026 Napilihan Agriculture Cooperative System
+        </footer>
+    </div>
+
+    <script src="../js/admin/admin.js?v=20260416f"></script>
 </body>
+
 </html>

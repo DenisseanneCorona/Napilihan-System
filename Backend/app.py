@@ -885,5 +885,23 @@ def api_payment_summary():
     return jsonify({"success": True, "summary": rows}), 200
 
 
+@app.post("/api/announcements")
+def api_create_announcement():
+    data = request.get_json(silent=True) or {}
+    title = (data.get("title") or "").strip()
+    content = (data.get("content") or "").strip()
+    success, msg = system.create_announcement(title, content)
+    if success:
+        return jsonify({"success": True, "message": msg}), 201
+    return jsonify({"success": False, "message": msg}), 400
+
+
+@app.get("/api/announcements")
+def api_list_announcements():
+    limit = request.args.get("limit")
+    announcements = system.list_announcements(int(limit) if limit and limit.isdigit() else None)
+    return jsonify({"success": True, "announcements": announcements}), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

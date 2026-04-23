@@ -287,6 +287,26 @@ doc.save("NAgCO_Report.pdf");
 }
 
 function logout() {
-localStorage.clear();
-window.location.href = "login.html";
+    localStorage.clear();
+    window.location.href = "login.html";
+}
+
+function goDashboard() {
+    window.location.href = "admin-dashboard.html";
+}
+
+function goLoan() {
+    window.location.href = "loan-management.html";
+}
+
+function goMembers() {
+    window.location.href = "members.html";
+}
+
+function openProfile() {
+    alert("Admin Profile");
+}
+
+function showNotifications() {
+    alert("Checking new loan requests.");
 }

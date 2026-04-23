@@ -1,45 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Loan Management | NAgCO</title>
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        if (localStorage.getItem("role") !== "admin") {
+            alert("Admin access only");
+            window.location.href = "login.html";
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Management | NAgCO</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="../images/logo.png">
 </head>
+
 <body>
-<div class="sidebar">
-<h2 class="logo">NAgCO</h2>
-<ul>
-<li onclick="window.location.href='admin-dashboard.html'">
-<i class="fa fa-home"></i> Dashboard
-</li>
-<li class="active">
-<i class="fa fa-hand-holding-dollar"></i> Loan Management
-</li>
-<li onclick="window.location.href='reports.html'">
-<i class="fa fa-chart-line"></i> Reports
-</li>
-<li onclick="window.location.href='members.html'">
-<i class="fa fa-users"></i> Members
-</li>
-<li onclick="logout()">
-<i class="fa fa-sign-out"></i> Logout
-</li>
-</ul>
-</div>
+    <div class="sidebar">
+        <div class="logo-left">
+            <img src="../images/logo.png" alt="NAgCO Logo" class="logo-img">
+        </div>
+        <ul>
+            <li onclick="goDashboard()"><i class="fa fa-home"></i> Dashboard</li>
+            <li class="active"><i class="fa fa-hand-holding-dollar"></i> Loan Management</li>
+            <li onclick="goReports()"><i class="fa fa-chart-line"></i> Reports</li>
+            <li onclick="goMembers()"><i class="fa fa-users"></i> Members</li>
+            <li onclick="logout()"><i class="fa fa-sign-out"></i> Logout</li>
+        </ul>
+    </div>
 
-<div class="main-content">
-<div class="topbar">
-<input type="text" id="searchMember" placeholder="Search member..." onkeyup="searchTable()">
-<div class="top-icons">
-<i class="fa fa-bell" onclick="showNotifications()"></i>
-<i class="fa fa-user-circle" onclick="openProfile()"></i>
-</div>
-</div>
+    <div class="main-content">
+        <div class="topbar" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <h1 style="margin: 0; font-size: 20px; color: #2e7d32;">Loan Management</h1>
+                <input type="text" id="searchMember" placeholder="Search member..." onkeyup="searchTable()" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; width: 250px; font-size: 14px;">
+            </div>
+            <div class="top-icons" style="display: flex; align-items: center; gap: 15px; color: #555;">
+                <i class="fa fa-bell" style="cursor: pointer; font-size: 18px;" onclick="showNotifications()"></i>
+                <i class="fa fa-user-circle" style="cursor: pointer; font-size: 22px; color: #2e7d32;" onclick="openProfile()"></i>
+            </div>
+        </div>
 
-<h1>Loan Management</h1>
-<p>Manage and approve cooperative loan applications.</p>
+        <p>Manage and approve cooperative loan applications.</p>
 
 <h2>Loan Requests</h2>
 <table id="loanTable">

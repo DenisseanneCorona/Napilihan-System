@@ -22,17 +22,17 @@ print("Frontend: http://localhost:8080")
 print()
 
 # Start backend (non-blocking)
-print("🚀 Starting backend...")
+print("Starting backend...")
 backend = subprocess.Popen([sys.executable, "Backend/app.py"])
 time.sleep(3)
-print(f"✅ Backend PID: {backend.pid}")
+print(f"Backend PID: {backend.pid}")
 
 # Start frontend (non-blocking)
-print("🚀 Starting frontend...")
+print("Starting frontend...")
 frontend = subprocess.Popen([sys.executable, "-m", "http.server", "8080", "-d", "Frontend"])
-print(f"✅ Frontend PID: {frontend.pid}")
+print(f"Frontend PID: {frontend.pid}")
 
-print("\n✅ Both servers running! Press Ctrl+C to stop.")
+print("\nBoth servers running! Press Ctrl+C to stop.")
 print("Login: http://localhost:8080/pages/login.html (admin/admin123)")
 
 try:

@@ -11,6 +11,7 @@ window.location.href = "login.html";
 <title>Member Dashboard | NAgCO</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="../images/logo.png">
     <style>
         /* Dashboard layout */
         .dashboard-wrapper {
@@ -151,7 +152,10 @@ window.location.href = "login.html";
 </head>
 <body>
 <div class="sidebar">
-    <h2 class="logo">NAgCO</h2>
+    <div class="logo-left">
+        <img src="../images/logo.png" alt="NAgCO Logo" class="logo-img">
+        <h2 class="logo-text">NAgCO</h2>
+    </div>
     <ul>
         <li class="active"><i class="fa fa-home"></i> Dashboard</li>
         <li onclick="openLoanForm()"><i class="fa fa-hand-holding-dollar"></i> Request Loan</li>
@@ -160,7 +164,13 @@ window.location.href = "login.html";
 </div>
 
 <div class="main-content dashboard-wrapper">
-    <h1 style="margin-bottom: 20px; font-size: 22px; color: #2e7d32;">Member Dashboard</h1>
+    <div class="topbar" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;">
+        <h1 style="margin: 0; font-size: 20px; color: #2e7d32;">Member Dashboard</h1>
+        <div class="top-icons" style="display: flex; align-items: center; gap: 15px; color: #555;">
+            <i class="fa fa-bell" style="cursor: pointer; font-size: 18px;" onclick="alert('No new notifications')"></i>
+            <i class="fa fa-user-circle" style="cursor: pointer; font-size: 22px; color: #2e7d32;" onclick="alert('Profile')"></i>
+        </div>
+    </div>
 
     <!-- Info Cards -->
     <div class="cards">

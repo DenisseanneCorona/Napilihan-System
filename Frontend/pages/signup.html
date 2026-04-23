@@ -2,226 +2,116 @@
 <html lang="en">
 
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>NAgCO Member Registration</title>
-
-<link rel="stylesheet" href="../css/style.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<style>
-
-body{
-font-family:'Poppins',sans-serif;
-background:#f4f6f9;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
-}
-
-.signup-container{
-width:100%;
-max-width:420px;
-}
-
-.signup-card{
-background:white;
-padding:35px;
-border-radius:12px;
-box-shadow:0 8px 25px rgba(0,0,0,0.1);
-text-align:center;
-}
-
-.logo-section img{
-width:70px;
-margin-bottom:10px;
-}
-
-.logo-section h2{
-margin:5px 0;
-color:#2e7d32;
-}
-
-.logo-section p{
-font-size:13px;
-color:#777;
-margin-bottom:20px;
-}
-
-.input-group{
-position:relative;
-margin-bottom:15px;
-}
-
-.input-group i{
-position:absolute;
-left:12px;
-top:12px;
-color:#777;
-}
-
-.input-group input{
-width:100%;
-padding:10px 10px 10px 35px;
-border:1px solid #ddd;
-border-radius:6px;
-outline:none;
-font-size:14px;
-}
-
-.input-group input:focus{
-border-color:#2e7d32;
-}
-
-.register-btn{
-width:100%;
-background:#2e7d32;
-color:white;
-border:none;
-padding:12px;
-border-radius:6px;
-cursor:pointer;
-font-size:15px;
-margin-top:10px;
-}
-
-.register-btn:hover{
-background:#1b5e20;
-}
-
-.login-link{
-margin-top:15px;
-font-size:14px;
-}
-
-.login-link a{
-color:#2e7d32;
-text-decoration:none;
-font-weight:500;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAgCO Member Registration</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="../images/logo.png">
 </head>
 
 <body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-section">
+                <img src="../images/logo.png" alt="NAgCO Loan Management System Logo">
+                <h2>NAgCO Loan Management System</h2>
+                <p>Napilihan Agriculture Cooperative</p>
+            </div>
+            
+            <form id="signupForm">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <div class="input-field">
+                        <i class="fa fa-user"></i>
+                        <input type="text" id="fullname" placeholder="Enter full name" required>
+                    </div>
+                </div>
 
-<div class="signup-container">
+                <div class="input-group">
+                    <label>Username</label>
+                    <div class="input-field">
+                        <i class="fa fa-user-circle"></i>
+                        <input type="text" id="username" placeholder="Enter username" required>
+                    </div>
+                </div>
 
-<div class="signup-card">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <div class="input-field">
+                        <i class="fa fa-envelope"></i>
+                        <input type="email" id="email" placeholder="Enter email address" required>
+                    </div>
+                </div>
 
-<div class="logo-section">
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="input-field">
+                        <i class="fa fa-lock"></i>
+                        <input type="password" id="password" placeholder="Enter password" required>
+                    </div>
+                </div>
 
-<img src="../images/logo.jpg" alt="NAgCO Logo">
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <div class="input-field">
+                        <i class="fa fa-check-circle"></i>
+                        <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+                    </div>
+                </div>
 
-<h2>NAgCO Registration</h2>
+                <button type="button" class="login-btn" onclick="register()">Register Account</button>
+                <div class="signup-link">
+                    Already have an account? <a href="login.html">Log In</a>
+                </div>
+            </form>
+        </div>
+    </div>
 
-<p>Napilihan Agriculture Cooperative</p>
+    <script>
+        async function register() {
+            let name = document.getElementById("fullname").value.trim();
+            let username = document.getElementById("username").value.trim().toLowerCase();
+            let email = document.getElementById("email").value.trim().toLowerCase();
+            let password = document.getElementById("password").value;
+            let confirmPassword = document.getElementById("confirmPassword").value;
 
-</div>
+            if (name === "" || username === "" || email === "" || password === "" || confirmPassword === "") {
+                alert("Please complete all fields");
+                return;
+            }
 
+            if (password !== confirmPassword) {
+                alert("Passwords do not match");
+                return;
+            }
 
-<form>
+            try {
+                const response = await fetch("http://127.0.0.1:5000/api/signup", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        fullname: name,
+                        username: username,
+                        email: email,
+                        password: password
+                    })
+                });
 
-<div class="input-group">
-<i class="fa fa-user"></i>
-<input type="text" id="fullname" placeholder="Full Name">
-</div>
+                const data = await response.json();
 
-<div class="input-group">
-<i class="fa fa-user"></i>
-<input type="text" id="username" placeholder="Username">
-</div>
-
-<div class="input-group">
-<i class="fa fa-envelope"></i>
-<input type="email" id="email" placeholder="Email Address">
-</div>
-
-<div class="input-group">
-<i class="fa fa-lock"></i>
-<input type="password" id="password" placeholder="Password">
-</div>
-
-<div class="input-group">
-<i class="fa fa-lock"></i>
-<input type="password" id="confirmPassword" placeholder="Confirm Password">
-</div>
-
-<button type="button" class="register-btn" onclick="register()">
-
-Register Account
-
-</button>
-
-<p class="login-link">
-
-Already have an account?
-<a href="login.html">Login</a>
-
-</p>
-
-</form>
-
-</div>
-
-</div>
-
-
-<script>
-
-async function register(){
-let name = document.getElementById("fullname").value.trim();
-let username = document.getElementById("username").value.trim().toLowerCase();
-let email = document.getElementById("email").value.trim().toLowerCase();
-let password = document.getElementById("password").value;
-let confirmPassword = document.getElementById("confirmPassword").value;
-
-if(name === "" || username === "" || email === "" || password === "" || confirmPassword === ""){
-alert("Please complete all fields");
-return;
-}
-
-if(password !== confirmPassword){
-alert("Passwords do not match");
-return;
-}
-
-try {
-const response = await fetch("http://127.0.0.1:5000/api/signup", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-fullname: name,
-username: username,
-email: email,
-password: password
-})
-});
-
-const data = await response.json();
-
-if (data.success) {
-alert("Registration submitted. Wait for admin approval.");
-window.location.href = "login.html";
-} else {
-alert(data.message || "Registration failed");
-}
-} catch (error) {
-alert("Cannot connect to server. Make sure backend is running.");
-}
-}
-
-</script>
-
+                if (data.success) {
+                    alert("Registration submitted. Wait for admin approval.");
+                    window.location.href = "login.html";
+                } else {
+                    alert(data.message || "Registration failed");
+                }
+            } catch (error) {
+                alert("Cannot connect to server. Make sure backend is running.");
+            }
+        }
+    </script>
 </body>
 
 </html>
