@@ -1,19 +1,19 @@
 let pendingOtpChallenge = null;
 const API_BASE = "http://127.0.0.1:5000/api";
 
-function finishLogin(data, fallbackUsername) {
-localStorage.setItem("loggedIn", "true");
-localStorage.setItem("role", data.role || "member");
-localStorage.setItem("currentUsername", data.username || fallbackUsername);
-localStorage.setItem("currentUser", JSON.stringify({
-fullname: data.fullname || fallbackUsername,
-role: data.role || "member"
-}));
-if ((data.role || "member") === "admin") {
-window.location.href = "../pages/admin-dashboard.html";
-} else {
-window.location.href = "../pages/member-dashboard.html";
-}
+function finishLogin(data) {
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("role", data.role || "member");
+    localStorage.setItem("currentUsername", data.username);
+    localStorage.setItem("currentUser", JSON.stringify({
+        fullname: data.fullname || data.username,
+        role: data.role || "member"
+    }));
+    if ((data.role || "member") === "admin") {
+        window.location.href = "../pages/admin-dashboard.html";
+    } else {
+        window.location.href = "../pages/member-dashboard.html";
+    }
 }
 
 function openTwoFactorModal(challengeId) {
@@ -51,11 +51,11 @@ challenge_id: pendingOtpChallenge,
 code: code
 })
 });
-const data = await response.json();
-if (data.success) {
-closeTwoFactorModal();
-finishLogin(data, data.username);
-} else {
+        const data = await response.json();
+        if (data.success) {
+            closeTwoFactorModal();
+            finishLogin(data);
+        } else {
 statusEl.style.color = "#c62828";
 statusEl.innerText = data.message || "Invalid OTP code.";
 }
@@ -88,14 +88,14 @@ data = await response.json();
 data = {};
 }
 
-if (data.success) {
-if (data.requires_otp) {
-if (statusEl) statusEl.innerText = "Password verified. Check your email for the OTP code.";
-openTwoFactorModal(data.challenge_id);
-} else {
-if (statusEl) statusEl.innerText = "Login success. Redirecting...";
-finishLogin(data, username);
-}
+        if (data.success) {
+            if (data.requires_otp) {
+                if (statusEl) statusEl.innerText = "Password verified. Check your email for the OTP code.";
+                openTwoFactorModal(data.challenge_id);
+            } else {
+                if (statusEl) statusEl.innerText = "Login success. Redirecting...";
+                finishLogin(data);
+            }
 } else if (response.status === 401) {
 if (statusEl) statusEl.innerText = data.message || "Invalid login credentials";
 alert(data.message || "Invalid login credentials");

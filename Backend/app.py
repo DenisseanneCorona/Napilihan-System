@@ -55,6 +55,41 @@ class LoginSystem:
             server.send_message(message)
         return True, "OTP sent."
 
+    def send_approval_email(self, recipient, fullname):
+        mail_server = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+        mail_port = int(os.environ.get("MAIL_PORT", "587"))
+        mail_use_tls = (os.environ.get("MAIL_USE_TLS", "true").lower() != "false")
+        mail_username = os.environ.get("MAIL_USERNAME")
+        mail_password = os.environ.get("MAIL_PASSWORD")
+        mail_sender = os.environ.get("MAIL_SENDER") or mail_username
+
+        if not mail_username or not mail_password or not mail_sender:
+            return False, "Email not configured."
+
+        message = EmailMessage()
+        message["Subject"] = "NAgCO Account Approved!"
+        message["From"] = mail_sender
+        message["To"] = recipient
+        message.set_content(
+            f"Dear {fullname},\n\n"
+            f"Congratulations! Your NAgCO (Napilihan Agriculture Cooperative) membership account has been approved.\n\n"
+            f"You can now log in to the system at http://localhost:8080/pages/login.html\n"
+            f"Use your username and password to access your member dashboard.\n\n"
+            f"Welcome to the cooperative!\n\n"
+            f"Best regards,\nNAgCO Management"
+        )
+
+        try:
+            with smtplib.SMTP(mail_server, mail_port, timeout=20) as server:
+                if mail_use_tls:
+                    server.starttls()
+                server.login(mail_username, mail_password)
+                server.send_message(message)
+            return True, "Approval email sent."
+        except Exception as e:
+            print(f"Failed to send approval email to {recipient}: {e}")
+            return False, str(e)
+
     def init_db(self):
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
@@ -169,8 +204,9 @@ class LoginSystem:
         conn.close()
 
     def sign_up(self, username, password, fullname="", email=""):
-        if not self.validate_input(username, password):
-            return False, "Invalid input."
+        valid, msg = self.validate_input(username, password)
+        if not valid:
+            return False, msg
         if self.username_exists(username):
             status = self.get_user_status(username)
             if status == "pending":
@@ -196,17 +232,18 @@ class LoginSystem:
             return False, f"Error: {str(e)}"
 
     def login(self, username, password):
-        if not self.validate_input(username, password):
-            return False, "Invalid input."
+        valid, msg = self.validate_input(username, password)
+        if not valid:
+            return False, msg
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT password_hash, fullname, status, role, two_factor_enabled, email
+            SELECT password_hash, fullname, status, role, email, username
             FROM users
-            WHERE username = ?
+            WHERE username = ? OR email = ?
             """,
-            (username,),
+            (username, username),
         )
         result = cursor.fetchone()
         conn.close()
@@ -217,51 +254,44 @@ class LoginSystem:
         try:
             password_hash = result[0].encode('utf-8')
             if bcrypt.checkpw(password.encode('utf-8'), password_hash):
-                fullname = result[1] or username
+                db_username = result[5]
+                fullname = result[1] or db_username
                 role = result[3] or "member"
-                two_factor_enabled = bool(result[4])
-                email = result[5]
-                if two_factor_enabled:
-                    if not email:
-                        return False, "Email address required for OTP verification. Please update your profile."
-
-                    try:
-                        otp_code = self.generate_email_otp()
-                        sent, send_message = self.send_email_otp(email, otp_code)
-                        if not sent:
-                            print(f"OTP send failed for {email}: {send_message}. Skipping OTP.")
-                            return True, {
-                                "message": "Login successful (OTP skipped due to config).",
-                                "fullname": fullname,
-                                "status": result[2],
-                                "role": role,
-                                "requires_otp": False,
-                            }
-                    except Exception as e:
-                        print(f"Email error: {e}")
+                email = result[4]
+                if not email:
+                    return False, "Email address required for OTP verification. Please contact admin to update your profile."
+                try:
+                    otp_code = self.generate_email_otp()
+                    sent, send_message = self.send_email_otp(email, otp_code)
+                    if not sent:
+                        print(f"OTP send failed for {email}: {send_message}. Skipping OTP.")
                         return True, {
-                            "message": "Login successful (email config issue).",
+                            "message": "Login successful (OTP skipped due to config).",
+                            "username": db_username,
                             "fullname": fullname,
                             "status": result[2],
                             "role": role,
                             "requires_otp": False,
                         }
-
-                    challenge_id = self.generate_login_challenge(username, fullname, role, otp_code)
+                except Exception as e:
+                    print(f"Email error: {e}")
                     return True, {
-                        "message": "Email OTP required.",
+                        "message": "Login successful (email config issue).",
+                        "username": db_username,
                         "fullname": fullname,
                         "status": result[2],
                         "role": role,
-                        "requires_otp": True,
-                        "challenge_id": challenge_id,
+                        "requires_otp": False,
                     }
+                challenge_id = self.generate_login_challenge(db_username, fullname, role, otp_code)
                 return True, {
-                    "message": "Login successful.",
+                    "message": "Email OTP required.",
+                    "username": db_username,
                     "fullname": fullname,
                     "status": result[2],
                     "role": role,
-                    "requires_otp": False,
+                    "requires_otp": True,
+                    "challenge_id": challenge_id,
                 }
             else:
                 return False, "Incorrect password."
@@ -285,68 +315,13 @@ class LoginSystem:
             "role": challenge["role"],
         }
 
-    def get_user_2fa_status(self, username):
-        conn = sqlite3.connect(self.db_name)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT username, COALESCE(fullname, username) AS fullname, role, two_factor_enabled
-            FROM users
-            WHERE username = ?
-            """,
-            (((username or "").strip().lower()),),
-        )
-        row = cursor.fetchone()
-        conn.close()
-        if not row:
-            return False, "User not found."
-        payload = dict(row)
-        payload["two_factor_enabled"] = bool(payload["two_factor_enabled"])
-        return True, payload
-
-    def set_user_2fa_enabled(self, username, enabled):
-        username = (username or "").strip().lower()
-        enabled = bool(enabled)
-        conn = sqlite3.connect(self.db_name)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            SELECT username, COALESCE(fullname, username) AS fullname, role, two_factor_secret
-            FROM users
-            WHERE username = ?
-            """,
-            (username,),
-        )
-        row = cursor.fetchone()
-        if not row:
-            conn.close()
-            return False, "User not found."
-        import pyotp
-        secret = row["two_factor_secret"] or pyotp.random_base32()
-        cursor.execute(
-            "UPDATE users SET two_factor_secret = ?, two_factor_enabled = ? WHERE username = ?",
-            (secret, 1 if enabled else 0, username),
-        )
-        conn.commit()
-        conn.close()
-        payload = {
-            "username": row["username"],
-            "fullname": row["fullname"],
-            "role": row["role"] or "member",
-            "two_factor_enabled": enabled,
-            "totp_secret": secret,
-        }
-        return True, payload
-
     def list_users(self):
         conn = sqlite3.connect(self.db_name)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT id, username, COALESCE(fullname, username) AS fullname, status, role, two_factor_enabled
+            SELECT id, username, COALESCE(fullname, username) AS fullname, email, status, role
             FROM users
             ORDER BY id DESC
             """
@@ -360,13 +335,35 @@ class LoginSystem:
             return False, "Invalid status."
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
+        cursor.execute("SELECT email, fullname FROM users WHERE username = ?", (username,))
+        user = cursor.fetchone()
+        if not user:
+            conn.close()
+            return False, "User not found."
+        email, fullname = user
         cursor.execute("UPDATE users SET status = ? WHERE username = ?", (status, username))
         conn.commit()
         changed = cursor.rowcount
         conn.close()
         if changed == 0:
             return False, "User not found."
+        # Send approval email if status is approved
+        if status == "approved" and email:
+            self.send_approval_email(email, fullname or username)
         return True, "User status updated."
+
+    def update_user_role(self, username, role):
+        if role not in ("admin", "member"):
+            return False, "Invalid role."
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET role = ? WHERE username = ?", (role, username))
+        conn.commit()
+        changed = cursor.rowcount
+        conn.close()
+        if changed == 0:
+            return False, "User not found."
+        return True, "Role updated."
 
     def delete_user_by_username(self, username):
         conn = sqlite3.connect(self.db_name)
@@ -399,12 +396,14 @@ class LoginSystem:
 
     def validate_input(self, username, password):
         if not username or not password:
-            return False
-        if len(username) < 3 or len(username) > 50:
-            return False
+            return False, "Username and password are required."
+        if len(username) < 3:
+            return False, "Username must be at least 3 characters."
+        if len(username) > 50:
+            return False, "Username must not exceed 50 characters."
         if len(password) < 6:
-            return False
-        return True
+            return False, "Password must be at least 6 characters."
+        return True, "Input valid."
 
     def change_password(self, username, old_password, new_password):
         if not self.validate_input(username, new_password):
@@ -754,24 +753,6 @@ def api_login_verify_otp():
     return jsonify({"success": False, "message": payload}), 401
 
 
-@app.get("/api/users/<username>/2fa")
-def api_user_2fa_status(username):
-    success, payload = system.get_user_2fa_status(username)
-    if success:
-        return jsonify({"success": True, **payload}), 200
-    return jsonify({"success": False, "message": payload}), 404
-
-
-@app.patch("/api/users/<username>/2fa")
-def api_user_2fa_toggle(username):
-    data = request.get_json(silent=True) or {}
-    enabled = bool(data.get("enabled"))
-    success, payload = system.set_user_2fa_enabled(username, enabled)
-    if success:
-        return jsonify({"success": True, **payload}), 200
-    return jsonify({"success": False, "message": payload}), 404
-
-
 @app.get("/api/users")
 def api_list_users():
     users = system.list_users()
@@ -782,10 +763,27 @@ def api_list_users():
 def api_update_user(username):
     data = request.get_json(silent=True) or {}
     status = (data.get("status") or "").strip().lower()
-    success, msg = system.update_user_status(username, status)
-    if success:
-        return jsonify({"success": True, "message": msg}), 200
-    return jsonify({"success": False, "message": msg}), 400
+    role = (data.get("role") or "").strip().lower()
+    
+    if role:
+        # Update role
+        conn = sqlite3.connect(system.db_name)
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET role = ? WHERE username = ?", (role, username))
+        conn.commit()
+        changed = cursor.rowcount
+        conn.close()
+        if changed == 0:
+            return jsonify({"success": False, "message": "User not found."}), 404
+        return jsonify({"success": True, "message": "Role updated."}), 200
+    
+    if status:
+        success, msg = system.update_user_status(username, status)
+        if success:
+            return jsonify({"success": True, "message": msg}), 200
+        return jsonify({"success": False, "message": msg}), 400
+    
+    return jsonify({"success": False, "message": "No update data provided."}), 400
 
 
 @app.delete("/api/users/<username>")

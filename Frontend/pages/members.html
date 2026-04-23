@@ -19,6 +19,18 @@ window.location.href="login.html";
 
 <body>
 
+<div class="sidebar">
+<h2 class="logo">NAgCO</h2>
+<ul>
+<li onclick="goDashboard()"><i class="fa fa-home"></i> Dashboard</li>
+<li onclick="goLoan()"><i class="fa fa-hand-holding-dollar"></i> Loan Management</li>
+<li onclick="goReports()"><i class="fa fa-chart-line"></i> Reports</li>
+<li class="active"><i class="fa fa-users"></i> Members</li>
+<li onclick="logout()"><i class="fa fa-sign-out"></i> Logout</li>
+</ul>
+</div>
+
+<div class="main-content">
 <h1>Member Management</h1>
 
 <table id="memberTable">
@@ -26,13 +38,13 @@ window.location.href="login.html";
 <th>Name</th>
 <th>Email</th>
 <th>Status</th>
+<th>Role</th>
 <th>Action</th>
 </tr>
 </table>
 
-<script src="../js/admin/admin.js"></script>
+</div>
 
-<tbody id="membersTableBody"></tbody>
-<script src="../js/admin/members.js"></script>
+<script src="../js/admin/admin.js"></script>
 </body>
 </html>

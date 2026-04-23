@@ -51,15 +51,15 @@ window.location.href = "login.html";
 </div>
 
 <h2>Member Management</h2>
-<table id="memberTable">
-<tr>
-<th>Name</th>
-<th>Email</th>
-<th>Status</th>
-<th>Email OTP</th>
-<th>Action</th>
-</tr>
-</table>
+    <table id="memberTable">
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Role</th>
+            <th>Action</th>
+        </tr>
+    </table>
 
 <h2>Announcements</h2>
 <div class="card" style="max-width: 700px; margin: 10px 0;">
@@ -77,9 +77,26 @@ window.location.href = "login.html";
 <th>Title</th>
 <th>Content</th>
 </tr>
-</table>
+    </table>
 
-<h2 id="loanSection">Loan Requests</h2>
+    <!-- Edit Role Modal -->
+    <div id="editRoleModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;">
+        <div style="max-width:400px; margin:10vh auto; background:#fff; border-radius:12px; padding:24px; box-shadow:0 8px 25px rgba(0,0,0,0.18);">
+            <h3 style="margin-top:0; color:#2e7d32;">Edit User Role</h3>
+            <p id="editRoleUsername" style="margin-bottom:16px; color:#555;"></p>
+            <label for="roleSelect" style="display:block; margin-bottom:8px; font-weight:500;">Role</label>
+            <select id="roleSelect" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:16px;">
+                <option value="member">Member</option>
+                <option value="admin">Admin</option>
+            </select>
+            <div style="display:flex; gap:10px;">
+                <button type="button" class="login-btn" style="margin-top:0;" onclick="saveUserRole()">Save</button>
+                <button type="button" class="login-btn" style="margin-top:0; background:#757575;" onclick="closeEditRoleModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <h2 id="loanSection">Loan Requests</h2>
 <table id="loanTable">
 <tr>
 <th>Member</th>

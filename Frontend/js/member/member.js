@@ -79,44 +79,6 @@ container.innerHTML = "<p>Failed to load announcements.</p>";
 }
 }
 
-async function loadMemberTwoFactorStatus() {
-const username = localStorage.getItem("currentUsername") || "";
-const statusEl = document.getElementById("memberTwoFactorStatus");
-if (!username || !statusEl) return;
-try {
-const response = await fetch(`${API_BASE}/users/${encodeURIComponent(username)}/2fa`);
-const data = await response.json();
-if (data.success) {
-statusEl.innerText = data.two_factor_enabled ? "Email OTP is enabled for this account." : "Email OTP is currently disabled.";
-} else {
-statusEl.innerText = data.message || "Failed to load OTP status.";
-}
-} catch (error) {
-statusEl.innerText = "Failed to load OTP status.";
-}
-}
-
-async function toggleMemberTwoFactor(enabled) {
-const username = localStorage.getItem("currentUsername") || "";
-if (!username) return;
-try {
-const response = await fetch(`${API_BASE}/users/${encodeURIComponent(username)}/2fa`, {
-method: "PATCH",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ enabled })
-});
-const data = await response.json();
-if (data.success) {
-alert(enabled ? "Email OTP enabled." : "Email OTP disabled.");
-await loadMemberTwoFactorStatus();
-} else {
-alert(data.message || "Failed to update OTP status.");
-}
-} catch (error) {
-alert("Cannot connect to server.");
-}
-}
-
 function openLoanForm() {
 document.getElementById("loanModal").style.display = "block";
 }
@@ -203,7 +165,6 @@ alert("Cannot connect to server.");
 window.onload = async function () {
 await loadLoanTypes();
 await loadAnnouncements();
-await loadMemberTwoFactorStatus();
 
 const memberKey = localStorage.getItem("currentUsername") || "";
 if (!memberKey) return;

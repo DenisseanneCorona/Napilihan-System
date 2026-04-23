@@ -1,6 +1,14 @@
 .venv/
+.venv3/
+venv/
+env/
 .vscode/
 __pycache__/
 *.pyc
 .env
 users.db
+test_*.py
+verify_*.py
+check_*.py
+list_*.py
+set_*.py
