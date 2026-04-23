@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NAgCO Member Registration</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+body{
+font-family:'Poppins',sans-serif;
+background:#f4f6f9;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.signup-container{
+width:100%;
+max-width:420px;
+}
+
+.signup-card{
+background:white;
+padding:35px;
+border-radius:12px;
+box-shadow:0 8px 25px rgba(0,0,0,0.1);
+text-align:center;
+}
+
+.logo-section img{
+width:70px;
+margin-bottom:10px;
+}
+
+.logo-section h2{
+margin:5px 0;
+color:#2e7d32;
+}
+
+.logo-section p{
+font-size:13px;
+color:#777;
+margin-bottom:20px;
+}
+
+.input-group{
+position:relative;
+margin-bottom:15px;
+}
+
+.input-group i{
+position:absolute;
+left:12px;
+top:12px;
+color:#777;
+}
+
+.input-group input{
+width:100%;
+padding:10px 10px 10px 35px;
+border:1px solid #ddd;
+border-radius:6px;
+outline:none;
+font-size:14px;
+}
+
+.input-group input:focus{
+border-color:#2e7d32;
+}
+
+.register-btn{
+width:100%;
+background:#2e7d32;
+color:white;
+border:none;
+padding:12px;
+border-radius:6px;
+cursor:pointer;
+font-size:15px;
+margin-top:10px;
+}
+
+.register-btn:hover{
+background:#1b5e20;
+}
+
+.login-link{
+margin-top:15px;
+font-size:14px;
+}
+
+.login-link a{
+color:#2e7d32;
+text-decoration:none;
+font-weight:500;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="signup-container">
+
+<div class="signup-card">
+
+<div class="logo-section">
+
+<img src="../images/logo.jpg" alt="NAgCO Logo">
+
+<h2>NAgCO Registration</h2>
+
+<p>Napilihan Agriculture Cooperative</p>
+
+</div>
+
+
+<form>
+
+<div class="input-group">
+<i class="fa fa-user"></i>
+<input type="text" id="fullname" placeholder="Full Name">
+</div>
+
+<div class="input-group">
+<i class="fa fa-user"></i>
+<input type="text" id="username" placeholder="Username">
+</div>
+
+<div class="input-group">
+<i class="fa fa-envelope"></i>
+<input type="email" id="email" placeholder="Email Address">
+</div>
+
+<div class="input-group">
+<i class="fa fa-lock"></i>
+<input type="password" id="password" placeholder="Password">
+</div>
+
+<div class="input-group">
+<i class="fa fa-lock"></i>
+<input type="password" id="confirmPassword" placeholder="Confirm Password">
+</div>
+
+<button type="button" class="register-btn" onclick="register()">
+
+Register Account
+
+</button>
+
+<p class="login-link">
+
+Already have an account?
+<a href="login.html">Login</a>
+
+</p>
+
+</form>
+
+</div>
+
+</div>
+
+
+<script>
+
+async function register(){
+let name = document.getElementById("fullname").value.trim();
+let username = document.getElementById("username").value.trim().toLowerCase();
+let email = document.getElementById("email").value.trim().toLowerCase();
+let password = document.getElementById("password").value;
+let confirmPassword = document.getElementById("confirmPassword").value;
+
+if(name === "" || username === "" || email === "" || password === "" || confirmPassword === ""){
+alert("Please complete all fields");
+return;
+}
+
+if(password !== confirmPassword){
+alert("Passwords do not match");
+return;
+}
+
+try {
+const response = await fetch("http://127.0.0.1:5000/api/signup", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({
+fullname: name,
+username: username,
+email: email,
+password: password
+})
+});
+
+const data = await response.json();
+
+if (data.success) {
+alert("Registration submitted. Wait for admin approval.");
+window.location.href = "login.html";
+} else {
+alert(data.message || "Registration failed");
+}
+} catch (error) {
+alert("Cannot connect to server. Make sure backend is running.");
+}
+}
+
+</script>
+
+</body>
+
+</html>

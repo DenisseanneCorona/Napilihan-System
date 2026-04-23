@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Management | NAgCO</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div class="sidebar">
+<h2 class="logo">NAgCO</h2>
+<ul>
+<li onclick="window.location.href='admin-dashboard.html'">
+<i class="fa fa-home"></i> Dashboard
+</li>
+<li class="active">
+<i class="fa fa-hand-holding-dollar"></i> Loan Management
+</li>
+<li onclick="window.location.href='reports.html'">
+<i class="fa fa-chart-line"></i> Reports
+</li>
+<li onclick="window.location.href='members.html'">
+<i class="fa fa-users"></i> Members
+</li>
+<li onclick="logout()">
+<i class="fa fa-sign-out"></i> Logout
+</li>
+</ul>
+</div>
+
+<div class="main-content">
+<div class="topbar">
+<input type="text" id="searchMember" placeholder="Search member..." onkeyup="searchTable()">
+<div class="top-icons">
+<i class="fa fa-bell" onclick="showNotifications()"></i>
+<i class="fa fa-user-circle" onclick="openProfile()"></i>
+</div>
+</div>
+
+<h1>Loan Management</h1>
+<p>Manage and approve cooperative loan applications.</p>
+
+<h2>Loan Requests</h2>
+<table id="loanTable">
+<tr>
+<th>Member</th>
+<th>Loan Type</th>
+<th>Amount</th>
+<th>Status</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+</table>
+</div>
+
+<script src="../js/admin/admin.js?v=20260416d"></script>
+</body>
+</html>

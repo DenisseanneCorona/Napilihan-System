@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NAgCO Loan Management System</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="login-container">
+
+<div class="login-card">
+
+<div class="logo-section">
+
+<img src="../images/logo.jpg" alt="NAgCO Loan Management System Logo">
+
+<h2>NAgCO Loan Management System</h2>
+
+<p>Napilihan Agriculture Cooperative</p>
+
+</div>
+
+<form id="loginForm">
+    <div class="input-group">
+        <label>Email or Username</label>
+        <div class="input-field">
+            <i class="fa fa-user"></i>
+            <input type="text" id="email" placeholder="Enter email or username" required>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Password</label>
+        <div class="input-field">
+            <i class="fa fa-lock"></i>
+            <input type="password" id="password" placeholder="Enter password" required>
+            <i class="fa fa-eye" onclick="togglePassword()"></i>
+        </div>
+    </div>
+
+    <button type="submit" class="login-btn">Log In</button>
+    <p id="statusMessage" style="margin-top:10px;color:#2e7d32;font-size:13px;"></p>
+</form>
+
+<div class="signup-link">
+
+Don't have an account?
+
+<a href="signup.html">Create Account</a>
+
+</div>
+
+</div>
+
+</div>
+
+<div id="twoFactorModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999;">
+    <div style="max-width:420px; margin:10vh auto; background:#fff; border-radius:12px; padding:24px; box-shadow:0 8px 25px rgba(0,0,0,0.18);">
+        <h3 style="margin-top:0; color:#2e7d32;">Email OTP</h3>
+        <p style="font-size:14px; color:#555;">Enter the 6-digit code sent to your email address.</p>
+        <input type="text" id="twoFactorCode" placeholder="123456" maxlength="6" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; font-size:16px; letter-spacing:4px; text-align:center;">
+        <p id="twoFactorStatus" style="margin-top:10px; font-size:13px; color:#c62828;"></p>
+        <div style="display:flex; gap:10px; margin-top:12px;">
+            <button type="button" class="login-btn" style="margin-top:0;" onclick="submitTwoFactorCode()">Verify Code</button>
+            <button type="button" class="login-btn" style="margin-top:0; background:#757575;" onclick="closeTwoFactorModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+
+<script src="../js/auth/login.js?v=20260416f"></script>
+
+
+<script>
+function togglePassword(){
+let password = document.getElementById("password");
+
+if(password.type === "password"){
+password.type = "text";
+}else{
+password.type = "password";
+}
+}
+</script>
+</body>
+
+</html>

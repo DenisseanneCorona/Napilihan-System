@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<script>
+if(localStorage.getItem("role") !== "admin"){
+alert("Admin only");
+window.location.href="login.html";
+}
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Members | NAgCO</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body>
+
+<h1>Member Management</h1>
+
+<table id="memberTable">
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</table>
+
+<script src="../js/admin/admin.js"></script>
+
+<tbody id="membersTableBody"></tbody>
+<script src="../js/admin/members.js"></script>
+</body>
+</html>

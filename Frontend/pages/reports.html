@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports | NAgCO</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div class="sidebar">
+<h2 class="logo">NAgCO</h2>
+<ul>
+<li onclick="window.location.href='admin-dashboard.html'"><i class="fa fa-home"></i> Dashboard</li>
+<li onclick="window.location.href='loan-management.html'"><i class="fa fa-hand-holding-dollar"></i> Loan Management</li>
+<li class="active"><i class="fa fa-chart-line"></i> Reports</li>
+<li onclick="logout()"><i class="fa fa-sign-out"></i> Logout</li>
+</ul>
+</div>
+
+<div class="main-content">
+<h1>Reports</h1>
+<p>View and generate cooperative financial reports.</p>
+<div class="cards">
+<div class="card">
+<h3>Monthly Collection</h3>
+<p id="monthlyCollectionTotal">PHP 0.00</p>
+<button onclick="viewMonthlyReport()">View Report</button>
+</div>
+<div class="card">
+<h3>Total Loans Released</h3>
+<p id="totalLoansReleased">PHP 0.00</p>
+<button onclick="viewLoanReport()">Loan Report</button>
+</div>
+<div class="card">
+<h3>Financial Summary</h3>
+<p>View Income & Expenses</p>
+<button onclick="generatePDF()">Generate PDF</button>
+</div>
+</div>
+
+<h2 id="monthlyReport">Monthly Collection Report</h2>
+<div class="card" style="max-width: 640px; margin: 10px 0;">
+<h3 style="margin: 0 0 10px 0;">Record Payment</h3>
+<div style="display:flex; gap:10px; flex-wrap:wrap;">
+<select id="paymentLoanId" style="flex:1; min-width: 220px; padding:10px; border:1px solid #ddd; border-radius:6px;">
+<option value="">Select approved loan</option>
+</select>
+<input id="paymentAmount" type="number" placeholder="Amount Paid" style="width: 200px; padding:10px; border:1px solid #ddd; border-radius:6px;">
+<input id="paymentDate" type="date" style="width: 180px; padding:10px; border:1px solid #ddd; border-radius:6px;">
+<button onclick="savePayment()" style="padding:10px 14px; border:none; border-radius:6px; background:#2e7d32; color:white; cursor:pointer;">Save</button>
+</div>
+</div>
+
+<table>
+<tr>
+<th>Month</th>
+<th>Total Collection</th>
+<th>Payment Count</th>
+</tr>
+<tbody id="monthlyTableBody"></tbody>
+</table>
+
+<h2 id="paymentReport">Payment History</h2>
+<table id="paymentTable">
+<tr>
+<th>Date</th>
+<th>Member</th>
+<th>Loan Type</th>
+<th>Amount Paid</th>
+</tr>
+<tbody id="paymentTableBody"></tbody>
+</table>
+
+<h2 id="loanReport">Loan Report</h2>
+<table id="loanReportTable">
+<tr>
+<th>Member</th>
+<th>Loan Amount</th>
+<th>Status</th>
+</tr>
+<tbody id="loanReportTbody"></tbody>
+</table>
+
+<h2 id="reportPreview">Report Preview</h2>
+<div class="card" style="max-width: 900px; margin: 10px 0 30px 0;">
+<div id="reportPreviewContent">Click "Generate PDF" to preview the actual report here before downloading.</div>
+<button id="downloadPdfButton" onclick="downloadPreviewPDF()" style="display:none; margin-top:15px; padding:10px 14px; border:none; border-radius:6px; background:#2e7d32; color:white; cursor:pointer;">Download PDF</button>
+</div>
+
+<footer>
+&copy; 2026 Napilihan Agriculture Cooperative System
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="../js/reports.js?v=20260416d"></script>
+</body>
+</html>
