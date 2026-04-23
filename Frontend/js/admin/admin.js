@@ -59,56 +59,38 @@ const response = await fetch(`${API_BASE}/users`);
 const data = await response.json();
 users = data.users || [];
 } catch (error) {
-table.innerHTML = "<tr><td colspan='4'>Failed to load users.</td></tr>";
-return;
+    table.innerHTML = "<tr><td colspan='5'>Failed to load users.</td></tr>";
+    return;
 }
 
-table.innerHTML = `
+    table.innerHTML = `
 <tr>
 <th>Name</th>
 <th>Email</th>
 <th>Status</th>
-<th>2FA</th>
+<th>Role</th>
 <th>Action</th>
 </tr>
 `;
 
 users.forEach((user) => {
-let displayName = user.fullname || user.username || "N/A";
-let status = (user.status || "pending").toLowerCase();
-table.innerHTML += `
+    let displayName = user.fullname || user.username || "N/A";
+    let role = (user.role || "member").toLowerCase();
+    let status = (user.status || "").toLowerCase();
+    table.innerHTML += `
 <tr>
 <td>${displayName}</td>
-<td>${user.username || "N/A"}</td>
+<td>${user.email || "N/A"}</td>
 <td class="${status}">${status.toUpperCase()}</td>
-<td>${user.two_factor_enabled ? "Enabled" : "Disabled"}</td>
+<td class="role-cell">${role.toUpperCase()}</td>
 <td>
 ${status === "pending" ? `<button onclick="approveUser('${user.username}')">Approve</button>` : "Approved"}
-<button onclick="toggleUserTwoFactor('${user.username}', ${user.two_factor_enabled ? "false" : "true"})">${user.two_factor_enabled ? "Disable OTP" : "Enable OTP"}</button>
+<button onclick="editUserRole('${user.username}', '${role}')">Edit Role</button>
 <button onclick="deleteUser('${user.username}')">Delete</button>
 </td>
 </tr>
 `;
 });
-}
-
-async function toggleUserTwoFactor(username, enabled) {
-try {
-const response = await fetch(`${API_BASE}/users/${encodeURIComponent(username)}/2fa`, {
-method: "PATCH",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ enabled })
-});
-const data = await response.json();
-if (data.success) {
-showToast(enabled ? "Email OTP enabled." : "Email OTP disabled.");
-loadUsers();
-} else {
-showToast(data.message || "Failed to update OTP status", true);
-}
-} catch (error) {
-showToast("Cannot connect to server.", true);
-}
 }
 
 async function approveUser(username) {
@@ -145,6 +127,42 @@ showToast(data.message || "Failed to delete user", true);
 } catch (error) {
 showToast("Cannot connect to server.", true);
 }
+}
+
+let editingUsername = null;
+
+function editUserRole(username, currentRole) {
+    editingUsername = username;
+    document.getElementById("editRoleUsername").innerText = `User: ${username}`;
+    document.getElementById("roleSelect").value = currentRole;
+    document.getElementById("editRoleModal").style.display = "block";
+}
+
+function closeEditRoleModal() {
+    document.getElementById("editRoleModal").style.display = "none";
+    editingUsername = null;
+}
+
+async function saveUserRole() {
+    if (!editingUsername) return;
+    const newRole = document.getElementById("roleSelect").value;
+    try {
+        const response = await fetch(`${API_BASE}/users/${encodeURIComponent(editingUsername)}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ role: newRole })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showToast("Role updated.");
+            closeEditRoleModal();
+            loadUsers();
+        } else {
+            showToast(data.message || "Failed to update role", true);
+        }
+    } catch (error) {
+        showToast("Cannot connect to server.", true);
+    }
 }
 
 async function loadAnnouncements() {
