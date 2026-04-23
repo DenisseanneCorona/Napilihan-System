@@ -184,7 +184,7 @@ class LoginSystem:
                 INSERT INTO users (username, password_hash, fullname, email, status, role, two_factor_enabled, two_factor_secret)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                ("admin", password_hash, "System Administrator", "admin@example.com", "approved", "admin", 1, None),
+                ("admin", password_hash, "System Administrator", "johncarloaganan26@gmail.com", "approved", "admin", 1, None),
             )
         else:
             cursor.execute(
@@ -192,9 +192,9 @@ class LoginSystem:
                 UPDATE users
                 SET role = 'admin',
                     two_factor_enabled = 1,
-                    email = 'admin@example.com'
+                    email = 'johncarloaganan26@gmail.com'
                 WHERE username = 'admin'
-                """,
+                """
             )
         cursor.execute("SELECT COUNT(*) FROM loan_types")
         if cursor.fetchone()[0] == 0:
