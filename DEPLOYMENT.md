@@ -177,7 +177,7 @@ npx serve -s . -p 8080
 ### Admin Access
 - Username: `admin`
 - Password: `admin123`
-- Email: `admin@example.com` (change this in production)
+- Email: `johncarloaganan26@gmail.com` (change this in production)
 
 ## Security Considerations
 

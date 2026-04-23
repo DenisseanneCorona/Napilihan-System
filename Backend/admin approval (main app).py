@@ -25,7 +25,7 @@ def create_admin():
         if not User.query.filter_by(username='admin').first():
             admin = User(
                 username='admin',
-                email='admin@example.com',
+                email='johncarloaganan26@gmail.com',
                 is_admin=True,
                 status=UserStatus.ACTIVE
             )
