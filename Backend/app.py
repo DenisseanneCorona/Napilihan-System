@@ -2,6 +2,7 @@ import sqlite3
 import bcrypt
 import os
 import smtplib
+import hashlib
 from dotenv import load_dotenv
 load_dotenv()
 from email.message import EmailMessage
@@ -98,6 +99,16 @@ class LoginSystem:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                token_hash TEXT UNIQUE NOT NULL,
+                expires_at INTEGER NOT NULL,
+                used INTEGER NOT NULL DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES users(id)
             )
         ''')
         cursor.execute('''
@@ -437,6 +448,120 @@ class LoginSystem:
         except Exception as e:
             return False, f"Error: {str(e)}"
 
+    def request_password_reset(self, email_or_username):
+        email_or_username = (email_or_username or "").strip()
+        if not email_or_username:
+            return False, "Email or username is required."
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id, email, username FROM users WHERE username = ? OR email = ?",
+            (email_or_username, email_or_username)
+        )
+        user = cursor.fetchone()
+        conn.close()
+        if not user:
+            return False, "No account found with that email or username."
+        user_id, email, username = user
+        if not email:
+            return False, "No email address associated with this account. Please contact admin."
+        token = os.urandom(32).hex()
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+        expires_at = int(datetime.now().timestamp()) + 3600
+        try:
+            conn = sqlite3.connect(self.db_name)
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)",
+                (user_id, token_hash, expires_at)
+            )
+            conn.commit()
+            conn.close()
+            reset_url = f"http://localhost:8080/pages/reset-password.html?token={token}"
+            success, msg = self.send_password_reset_email(email, username, reset_url)
+            if not success:
+                return False, f"Failed to send email: {msg}"
+            return True, "Password reset email sent. Check your inbox."
+        except Exception as e:
+            return False, f"Error: {str(e)}"
+
+    def send_password_reset_email(self, recipient, username, reset_url):
+        mail_server = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+        mail_port = int(os.environ.get("MAIL_PORT", "587"))
+        mail_use_tls = (os.environ.get("MAIL_USE_TLS", "true").lower() != "false")
+        mail_username = os.environ.get("MAIL_USERNAME")
+        mail_password = os.environ.get("MAIL_PASSWORD")
+        mail_sender = os.environ.get("MAIL_SENDER") or mail_username
+        if not mail_username or not mail_password or not mail_sender:
+            return False, "Email not configured."
+        message = EmailMessage()
+        message["Subject"] = "NAgCO Password Reset"
+        message["From"] = mail_sender
+        message["To"] = recipient
+        message.set_content(
+            f"Dear {username},\n\n"
+            f"You requested a password reset for your NAgCO account.\n\n"
+            f"Click the link below to set a new password (valid for 1 hour):\n"
+            f"{reset_url}\n\n"
+            f"If you didn't request this, please ignore this email.\n\n"
+            f"Best regards,\nNAgCO Management"
+        )
+        try:
+            with smtplib.SMTP(mail_server, mail_port, timeout=20) as server:
+                if mail_use_tls:
+                    server.starttls()
+                server.login(mail_username, mail_password)
+                server.send_message(message)
+            return True, "Email sent."
+        except Exception as e:
+            print(f"Failed to send password reset email to {recipient}: {e}")
+            return False, str(e)
+
+    def reset_password(self, token, new_password):
+        token = (token or "").strip()
+        if not token:
+            return False, "Invalid reset token."
+        valid, msg = self.validate_input("dummy", new_password)
+        if not valid:
+            return False, msg
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+        try:
+            conn = sqlite3.connect(self.db_name)
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT id, user_id, expires_at, used
+                FROM password_reset_tokens
+                WHERE token_hash = ?
+                """,
+                (token_hash,)
+            )
+            row = cursor.fetchone()
+            if not row:
+                conn.close()
+                return False, "Invalid reset token."
+            token_id, user_id, expires_at, used = row
+            if used:
+                conn.close()
+                return False, "Token already used."
+            if int(datetime.now().timestamp()) > expires_at:
+                conn.close()
+                return False, "Token expired."
+            password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+            cursor.execute(
+                "UPDATE users SET password_hash = ? WHERE id = ?",
+                (password_hash.decode('utf-8'), user_id)
+            )
+            cursor.execute(
+                "UPDATE password_reset_tokens SET used = 1 WHERE id = ?",
+                (token_id,)
+            )
+            conn.commit()
+            conn.close()
+            return True, "Password reset successfully."
+        except Exception as e:
+            return False, f"Error: {str(e)}"
+
     def create_loan(self, member_username, loan_type, amount, months, date_created):
         member_username = (member_username or "").strip().lower()
         loan_type = (loan_type or "").strip().upper()
@@ -751,6 +876,27 @@ def api_login_verify_otp():
     if success:
         return jsonify({"success": True, **payload}), 200
     return jsonify({"success": False, "message": payload}), 401
+
+
+@app.post("/api/forgot-password")
+def api_forgot_password():
+    data = request.get_json(silent=True) or {}
+    email_or_username = (data.get("email") or data.get("username") or "").strip()
+    success, msg = system.request_password_reset(email_or_username)
+    if success:
+        return jsonify({"success": True, "message": msg}), 200
+    return jsonify({"success": False, "message": msg}), 400
+
+
+@app.post("/api/reset-password")
+def api_reset_password():
+    data = request.get_json(silent=True) or {}
+    token = (data.get("token") or "").strip()
+    new_password = data.get("new_password") or ""
+    success, msg = system.reset_password(token, new_password)
+    if success:
+        return jsonify({"success": True, "message": msg}), 200
+    return jsonify({"success": False, "message": msg}), 400
 
 
 @app.get("/api/users")
