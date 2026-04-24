@@ -275,25 +275,10 @@ class LoginSystem:
                     otp_code = self.generate_email_otp()
                     sent, send_message = self.send_email_otp(email, otp_code)
                     if not sent:
-                        print(f"OTP send failed for {email}: {send_message}. Skipping OTP.")
-                        return True, {
-                            "message": "Login successful (OTP skipped due to config).",
-                            "username": db_username,
-                            "fullname": fullname,
-                            "status": result[2],
-                            "role": role,
-                            "requires_otp": False,
-                        }
+                        return False, f"Failed to send OTP: {send_message}"
                 except Exception as e:
                     print(f"Email error: {e}")
-                    return True, {
-                        "message": "Login successful (email config issue).",
-                        "username": db_username,
-                        "fullname": fullname,
-                        "status": result[2],
-                        "role": role,
-                        "requires_otp": False,
-                    }
+                    return False, f"Email error: {str(e)}"
                 challenge_id = self.generate_login_challenge(db_username, fullname, role, otp_code)
                 return True, {
                     "message": "Email OTP required.",
